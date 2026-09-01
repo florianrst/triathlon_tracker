@@ -1,0 +1,32 @@
+[project]
+name = "triathlon-tracker"
+version = "0.1.0"
+description = "Suivi de preparation triathlon (70.3 / XL) : ingestion FIT/GPX/NDJSON, charge 80/20, zones historisees"
+authors = [
+    { name = "florian_rst", email = "florian.selot.dev@proton.me" }
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = [
+    "fitparse>=1.2.0",
+    "folium>=0.20.0",
+    "gpxpy>=1.6.2",
+    "pandas>=3.0.5",
+    "plotly>=7.0.0",
+    "sqlalchemy>=2.0.52",
+    "streamlit>=1.62.0",
+    "streamlit-folium>=0.27.4",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

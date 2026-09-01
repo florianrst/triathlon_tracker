@@ -1,0 +1,154 @@
+"""Page Charge : TSS calcule maison (PMC), respect du 80/20, sommeil & recup."""
+
+from __future__ import annotations
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
+from sqlalchemy import select
+
+from analysis import (
+    INTENSITES,
+    aggregate,
+    performance_management,
+    periodic_load,
+    polarization_ratio,
+    sessions_dataframe,
+    zone_history,
+)
+from database import engine, init_db
+from models import RecoveryDaily, SleepDaily
+from ui.periode import selecteur_periode
+
+st.set_page_config(page_title="Charge", page_icon="📈", layout="wide")
+init_db()
+
+st.title("📈 Charge d'entrainement & polarisation")
+
+df_all = sessions_dataframe()
+if df_all.empty:
+    st.info("Aucune seance. Va sur la page Import.")
+    st.stop()
+
+periode = selecteur_periode("charge")
+mask = (df_all["date"] >= periode.debut) & (df_all["date"] <= periode.fin)
+df = df_all[mask].copy()
+if df.empty:
+    st.warning(f"Aucune seance sur {periode.libelle().lower()}.")
+    st.stop()
+
+pl = periodic_load(df, periode.granularite)
+
+# --- Volume par sport ----------------------------------------------------
+st.subheader(f"Volume par sport — groupe par {periode.granularite}")
+sports = [c for c in ["natation", "velo", "course", "renfo", "autre"] if c in pl.columns]
+fig = go.Figure()
+for sp in sports:
+    fig.add_bar(x=pl["bucket"], y=pl[sp], name=sp)
+fig.update_layout(barmode="stack", height=360, yaxis_title="heures", legend=dict(orientation="h"))
+st.plotly_chart(fig, use_container_width=True)
+
+# --- TSS calcule maison + PMC (CTL / ATL / TSB) -------------------------
+st.subheader("Charge (TSS calcule maison) — CTL / ATL / TSB")
+st.caption(
+    "TSS calcule EN INTERNE a partir des donnees brutes (FC, allure, puissance) "
+    "— independant de la montre. CTL = forme (42 j), ATL = fatigue (7 j), "
+    "TSB = fraicheur (CTL − ATL)."
+)
+pmc_all = performance_management(df_all)  # PMC sur tout l'historique, on zoome ensuite
+pmc = pmc_all[(pmc_all["date"] >= pd.Timestamp(periode.debut)) & (pmc_all["date"] <= pd.Timestamp(periode.fin))]
+fig2 = go.Figure()
+fig2.add_bar(x=pmc["date"], y=pmc["tss_jour"], name="TSS / jour", marker_color="#d7dde3")
+fig2.add_scatter(x=pmc["date"], y=pmc["ctl"], name="CTL (forme)", line=dict(color="#2f6fed"))
+fig2.add_scatter(x=pmc["date"], y=pmc["atl"], name="ATL (fatigue)", line=dict(color="#e2483d"))
+fig2.add_scatter(x=pmc["date"], y=pmc["tsb"], name="TSB (fraicheur)",
+                 line=dict(color="#4c9a52", dash="dot"))
+fig2.update_layout(height=360, legend=dict(orientation="h"))
+st.plotly_chart(fig2, use_container_width=True)
+
+meth = df["tss_methode"].dropna().value_counts()
+if not meth.empty:
+    total = int(meth.sum())
+    txt = " · ".join(f"{k} {100 * v / total:.0f} %" for k, v in meth.items())
+    st.caption(f"Methodes de calcul sur la periode : {txt}")
+
+# --- Respect du 80/20 --------------------------------------------------
+st.subheader("Respect du modele polarise 80/20")
+bas, haut = polarization_ratio(df)
+g1, g2 = st.columns([1, 2])
+with g1:
+    gauge = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=haut,
+        title={"text": "% haute intensite"},
+        gauge={
+            "axis": {"range": [0, 40]},
+            "bar": {"color": "#e2483d"},
+            "steps": [
+                {"range": [0, 20], "color": "#cdeccd"},
+                {"range": [20, 30], "color": "#fdf1c2"},
+                {"range": [30, 40], "color": "#f7d2ce"},
+            ],
+            "threshold": {"line": {"color": "black", "width": 3}, "value": 20},
+        },
+    ))
+    gauge.update_layout(height=280, margin=dict(t=50, b=10))
+    st.plotly_chart(gauge, use_container_width=True)
+    st.metric("Endurance fondamentale", f"{bas:.0f} %", help="Cible ~80 %")
+
+with g2:
+    parts = pl[["bucket", "basse", "moderee", "haute"]].copy()
+    long = parts.melt("bucket", var_name="intensite", value_name="heures")
+    order = {k: i for i, k in enumerate(INTENSITES)}
+    long = long.sort_values("intensite", key=lambda s: s.map(order))
+    figp = px.bar(long, x="bucket", y="heures", color="intensite",
+                  color_discrete_map={"basse": "#4c9a52", "moderee": "#e8b84b", "haute": "#e2483d"})
+    figp.update_layout(barmode="stack", height=280, legend=dict(orientation="h"))
+    st.plotly_chart(figp, use_container_width=True)
+
+recap = pl[["bucket", "total_h", "tss", "pct_basse", "pct_haute"]].copy()
+recap[["total_h", "tss", "pct_basse", "pct_haute"]] = recap[
+    ["total_h", "tss", "pct_basse", "pct_haute"]
+].round(1)
+st.dataframe(recap, use_container_width=True, hide_index=True)
+
+# --- Recuperation (sommeil + stress) ----------------------------------
+st.divider()
+st.subheader("Recuperation sur la periode")
+sleep = pd.read_sql(
+    select(SleepDaily).where(
+        SleepDaily.date >= periode.debut, SleepDaily.date <= periode.fin
+    ),
+    engine,
+)
+recov = pd.read_sql(
+    select(RecoveryDaily).where(
+        RecoveryDaily.date >= periode.debut, RecoveryDaily.date <= periode.fin
+    ),
+    engine,
+)
+r1, r2, r3 = st.columns(3)
+if not sleep.empty:
+    h_moy = sleep["duree_totale_s"].dropna().mean() / 3600.0
+    pct_court = (sleep["duree_totale_s"].dropna() < 7 * 3600).mean() * 100
+    r1.metric("Sommeil moyen / nuit", f"{h_moy:.1f} h")
+    r2.metric("Nuits < 7 h", f"{pct_court:.0f} %")
+else:
+    r1.info("Pas de donnees de sommeil sur la periode.")
+if not recov.empty:
+    r3.metric("Balance recup moyenne", f"{recov['balance_moy'].dropna().mean():.2f}",
+              help="0 → 1, plus haut = mieux recupere")
+st.caption("Detail complet : page **Recuperation**.")
+
+# --- Evolution des zones --------------------------------------------
+st.divider()
+st.subheader("Evolution des seuils / zones")
+disc = st.selectbox("Discipline", ["course", "natation", "velo"])
+zh = zone_history(disc)
+if zh.empty:
+    st.info("Aucun set de zones pour cette discipline. Voir la page Tests & zones.")
+else:
+    for _, z in zh.iterrows():
+        with st.expander(f"Valide a partir du {z['date_debut_validite']}"):
+            st.json(z["zones_json"])
