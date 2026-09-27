@@ -51,6 +51,24 @@ class Discipline(str, enum.Enum):
     course = "course"
 
 
+class TypeSeance(str, enum.Enum):
+    endurance = "endurance"
+    seuil = "seuil"
+    vma = "vma"
+    recup = "recup"
+    force = "force"
+    technique = "technique"
+    competition = "competition"
+    autre = "autre"
+
+
+class StatutSeance(str, enum.Enum):
+    prevue = "prevue"
+    realisee = "realisee"
+    manquee = "manquee"
+    annulee = "annulee"
+
+
 class Session(Base):
     __tablename__ = "sessions"
 
@@ -209,6 +227,33 @@ class ZoneSet(Base):
     zones_json: Mapped[dict] = mapped_column(JSON)
 
     source_test: Mapped[ThresholdTest | None] = relationship(back_populates="zone_sets")
+
+
+class PlannedWorkout(Base):
+    """Seance planifiee, structuree par blocs (echauffement / travail /
+    recuperation / retour au calme) - proche d'un "workout" TrainingPeaks.
+
+    Contrairement a ``ThresholdTest`` / ``ZoneSet``, PAS historise : c'est un
+    objet de planification que l'on peut librement corriger ou reprogrammer,
+    pas un fait mesure a dater. ``date_prevue`` est optionnelle : sans date,
+    la seance reste dans la bibliotheque de modeles reutilisables.
+    """
+
+    __tablename__ = "planned_workouts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    titre: Mapped[str] = mapped_column(String(120))
+    sport: Mapped[Sport] = mapped_column(SqlEnum(Sport), index=True)
+    type_seance: Mapped[TypeSeance] = mapped_column(SqlEnum(TypeSeance), index=True)
+    date_prevue: Mapped[date | None] = mapped_column(Date, index=True, nullable=True)
+    statut: Mapped[StatutSeance] = mapped_column(SqlEnum(StatutSeance), default=StatutSeance.prevue)
+    # liste de blocs {type, duree_s?, distance_m?, repetitions?, zone_cible?, notes?}
+    blocs_json: Mapped[list] = mapped_column(JSON)
+    duree_estimee_s: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # seance reelle correspondante, une fois realisee (planifie vs realise)
+    session_id: Mapped[int | None] = mapped_column(ForeignKey("sessions.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
 class DailyPassive(Base):
