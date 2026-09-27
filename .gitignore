@@ -14,3 +14,7 @@ data/*.db
 data/incoming/*
 !data/incoming/.gitkeep
 data/archive/
+
+# Secrets API Claude (si utilise a la place de la variable d'environnement)
+.env
+.streamlit/secrets.toml

@@ -13,6 +13,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from ui.chat import widget_chat
+
 st.set_page_config(page_title="Plan", page_icon="🗓️", layout="wide")
 
 st.title("🗓️ Plan de preparation 70.3 / XL")
@@ -95,3 +97,9 @@ with st.expander("Rappels methode"):
         "- **Briques velo-course** a introduire en bloc Developpement, allongees en Specifique.\n"
         "- **Velo** : integrer travail de force/puissance quand le velo route est la."
     )
+
+contexte_page = (
+    f"Page Plan. Course cible : {format_course} le {course}. "
+    f"{n_weeks} semaines de prepa, volume {vol_min}→{vol_max} h/sem, 80/20 applique."
+)
+widget_chat("plan", contexte_page)

@@ -12,6 +12,7 @@ import streamlit as st
 
 from analysis import polarization_ratio, sessions_dataframe
 from database import init_db
+from ui.chat import widget_chat
 
 st.set_page_config(page_title="Suivi Triathlon", page_icon="🏊", layout="wide")
 
@@ -64,3 +65,10 @@ if haut > 25:
         f"Part haute intensite a {haut:.0f} % sur la periode (cible ~20 %). "
         "Attention a ne pas deriver du modele polarise."
     )
+
+contexte_page = (
+    f"Page d'accueil. {len(df)} seances en base, volume total {df['duree_h'].sum():.1f} h, "
+    f"volume/semaine {df['duree_h'].sum() / periode_j * 7:.1f} h, "
+    f"polarisation {bas:.0f}/{haut:.0f} % (cible 80/20)."
+)
+widget_chat("accueil", contexte_page)

@@ -19,6 +19,7 @@ from analysis import (
 )
 from database import engine, init_db
 from models import RecoveryDaily, SleepDaily
+from ui.chat import widget_chat
 from ui.periode import selecteur_periode
 
 st.set_page_config(page_title="Charge", page_icon="📈", layout="wide")
@@ -152,3 +153,15 @@ else:
     for _, z in zh.iterrows():
         with st.expander(f"Valide a partir du {z['date_debut_validite']}"):
             st.json(z["zones_json"])
+
+if not pmc.empty:
+    derniere = pmc.iloc[-1]
+    pmc_txt = f"CTL/ATL/TSB (derniere valeur) : {derniere['ctl']:.0f} / {derniere['atl']:.0f} / {derniere['tsb']:.0f}."
+else:
+    pmc_txt = "Pas de PMC calculable sur la periode."
+contexte_page = (
+    f"Page Charge, periode {periode.libelle()}. "
+    f"Polarisation {bas:.0f}/{haut:.0f} % (cible 80/20). {pmc_txt} "
+    f"Charge periodique (dernieres lignes) :\n{pl.tail(3).to_string(index=False)}"
+)
+widget_chat("charge", contexte_page)

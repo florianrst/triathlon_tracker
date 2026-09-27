@@ -14,6 +14,7 @@ from streamlit_folium import st_folium
 from analysis import aggregate, sessions_dataframe
 from database import engine, get_session, init_db
 from models import BikeDetails, RunDetails, Session, SessionPoint, SwimDetails
+from ui.chat import widget_chat
 from ui.periode import selecteur_periode
 
 st.set_page_config(page_title="Seances", page_icon="📋", layout="wide")
@@ -177,3 +178,10 @@ with st.form("edit"):
             obj.notes = notes or None
         st.success("Mis a jour.")
         st.rerun()
+
+contexte_page = (
+    f"Page Seances. Seance selectionnee : #{sid} — {row['date']} — {row['sport']} — "
+    f"{row['duree_min']:.0f} min, distance {row['distance_km']:.2f} km, "
+    f"FC moy {row['hr_moy']}, RPE {row['ressenti_rpe']}."
+)
+widget_chat("seances", contexte_page)

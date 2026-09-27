@@ -9,6 +9,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
+    "anthropic>=1.8.0",
     "fitparse>=1.2.0",
     "folium>=0.20.0",
     "gpxpy>=1.6.2",

@@ -13,6 +13,7 @@ from sqlalchemy import select
 from database import engine, get_session, init_db
 from ingestion.seed import seed_calibration
 from models import AthleteThreshold, Discipline, Session, ThresholdTest, ZoneSet
+from ui.chat import widget_chat
 
 # course au sens large -> discipline "course"
 _SPORT_FOR_DISCIPLINE = {"natation": ("natation",), "velo": ("velo",), "course": ("course",)}
@@ -219,3 +220,11 @@ else:
             src_txt = "" if pd.isna(z["source_test_id"]) else f"  (test #{int(z['source_test_id'])})"
             with st.expander(f"Valide a partir du {z['date_debut_validite']}{src_txt}"):
                 st.json(z["zones_json"])
+
+dernier_test = "" if tests.empty else tests.iloc[-1].to_dict()
+dernier_seuil = "" if seuils.empty else seuils.iloc[-1].to_dict()
+contexte_page = (
+    f"Page Tests & zones. Dernier test de seuil : {dernier_test}. "
+    f"Derniers seuils enregistres : {dernier_seuil}."
+)
+widget_chat("tests_zones", contexte_page)

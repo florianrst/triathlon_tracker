@@ -16,6 +16,7 @@ from sqlalchemy import select
 from analysis import performance_management, sessions_dataframe
 from database import engine, init_db
 from models import RecoveryDaily, SleepDaily
+from ui.chat import widget_chat
 from ui.periode import selecteur_periode
 
 st.set_page_config(page_title="Recuperation", page_icon="😴", layout="wide")
@@ -118,3 +119,11 @@ else:
         fig3.update_yaxes(title_text="balance J+1", secondary_y=True, range=[0, 1])
     fig3.update_layout(height=340, legend=dict(orientation="h"), yaxis_title="TSS")
     st.plotly_chart(fig3, use_container_width=True)
+
+sommeil_txt = f"{sleep['h_totale'].mean():.1f} h/nuit" if not sleep.empty and "h_totale" in sleep else "n/a"
+balance_txt = f"{recov['balance_moy'].mean():.2f}" if not recov.empty else "n/a"
+contexte_page = (
+    f"Page Recuperation, periode {periode.libelle()}. "
+    f"Sommeil moyen : {sommeil_txt}. Balance recup moyenne : {balance_txt}."
+)
+widget_chat("recuperation", contexte_page)

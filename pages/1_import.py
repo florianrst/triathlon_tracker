@@ -10,6 +10,7 @@ import streamlit as st
 from database import INCOMING_DIR, init_db
 from ingestion.persist import ingest_paths, persist_session
 from ingestion.watcher import eligible_paths, scan_incoming
+from ui.chat import widget_chat
 
 st.set_page_config(page_title="Import", page_icon="📥", layout="wide")
 init_db()
@@ -153,3 +154,11 @@ if submitted:
     }
     res = persist_session(norm)
     _render([res])
+
+contexte_page = (
+    f"Page Import. Dossier surveille : {par_ext.get('.fit', 0)} FIT, "
+    f"{par_ext.get('.gpx', 0)} GPX, {ndjson_kinds.get('24/7', 0)} NDJSON 24/7, "
+    f"{ndjson_kinds.get('sommeil', 0)} NDJSON sommeil, {ndjson_kinds.get('recup', 0)} NDJSON recup "
+    "en attente d'import."
+)
+widget_chat("import", contexte_page)
