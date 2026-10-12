@@ -18,3 +18,7 @@ data/archive/
 # Secrets API Claude (si utilise a la place de la variable d'environnement)
 .env
 .streamlit/secrets.toml
+
+# start.sh / stop.sh
+.streamlit.pid
+streamlit.log
