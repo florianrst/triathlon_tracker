@@ -6,8 +6,8 @@ from datetime import date
 
 from sqlalchemy import select
 
-from database import get_session
-from models import Session, SourceFormat, Sport
+from core.database import get_session
+from core.models import Session, SourceFormat, Sport
 from scripts.reclassify_sports import _apply, _planned_changes
 
 

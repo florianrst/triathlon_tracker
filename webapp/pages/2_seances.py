@@ -11,9 +11,9 @@ from plotly.subplots import make_subplots
 from sqlalchemy import select
 from streamlit_folium import st_folium
 
-from analysis import aggregate, sessions_dataframe
-from database import engine, get_session, init_db
-from models import BikeDetails, RunDetails, Session, SessionPoint, SwimDetails
+from core.analysis import aggregate, sessions_dataframe
+from core.database import engine, get_session, init_db
+from core.models import BikeDetails, RunDetails, Session, SessionPoint, SwimDetails
 from ui.chat import widget_chat
 from ui.periode import selecteur_periode
 

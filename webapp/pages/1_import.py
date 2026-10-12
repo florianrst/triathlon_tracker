@@ -7,7 +7,7 @@ from datetime import date
 
 import streamlit as st
 
-from database import INCOMING_DIR, init_db
+from core.database import INCOMING_DIR, init_db
 from ingestion.persist import ingest_paths, persist_session
 from ingestion.watcher import eligible_paths, scan_incoming
 from ui.chat import widget_chat

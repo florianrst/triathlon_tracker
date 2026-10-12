@@ -15,8 +15,8 @@ from typing import Callable
 
 from sqlalchemy import insert, select
 
-from database import get_session
-from models import (
+from core.database import get_session
+from core.models import (
     BikeDetails,
     DailyPassive,
     RecoveryDaily,
@@ -129,11 +129,11 @@ def persist_session(
 def _compute_session_tss(
     norm: dict, sport: str, points: list[dict], details: dict
 ) -> tuple[float | None, str | None]:
-    """Charge interne (cf. tss.py). Best-effort : une ereur ici ne bloque pas
+    """Charge interne (cf. core.tss). Best-effort : une ereur ici ne bloque pas
     l'import (le recalcul de masse ``scripts.recompute_tss`` reste la reference)."""
     try:
-        from thresholds import ThresholdResolver
-        from tss import compute_tss
+        from core.thresholds import ThresholdResolver
+        from core.tss import compute_tss
 
         th = ThresholdResolver().seuils_for(sport, norm["date"])
         allure_nat = details.get("allure_moy_100m") if sport == Sport.natation.value else None

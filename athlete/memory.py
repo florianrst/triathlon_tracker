@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from athlete import Profil, load_profil
+from athlete.profil import Profil, load_profil
 
 BASE_DIR = Path(__file__).resolve().parent
 USER_DIR = BASE_DIR / "user"

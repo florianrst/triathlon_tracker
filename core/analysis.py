@@ -12,8 +12,8 @@ from datetime import date, timedelta
 import pandas as pd
 from sqlalchemy import select
 
-from database import engine, get_session
-from models import Session, SessionPoint, ZoneSet
+from core.database import engine, get_session
+from core.models import Session, SessionPoint, ZoneSet
 
 # --- Intensite d'une seance -------------------------------------------------
 

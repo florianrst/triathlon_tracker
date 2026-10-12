@@ -10,8 +10,8 @@ from datetime import date
 
 from sqlalchemy import select
 
-from database import get_session
-from models import Discipline, ThresholdTest, ZoneSet
+from core.database import get_session
+from core.models import Discipline, ThresholdTest, ZoneSet
 
 _CALIBRATION_DATE = date(2026, 6, 1)  # calage de reference (prepa precedente)
 

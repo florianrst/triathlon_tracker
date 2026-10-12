@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from sqlalchemy import select
 
-from analysis import (
+from core.analysis import (
     INTENSITES,
     aggregate,
     performance_management,
@@ -17,8 +17,8 @@ from analysis import (
     sessions_dataframe,
     zone_history,
 )
-from database import engine, init_db
-from models import RecoveryDaily, SleepDaily
+from core.database import engine, init_db
+from core.models import RecoveryDaily, SleepDaily
 from ui.chat import widget_chat
 from ui.periode import selecteur_periode
 

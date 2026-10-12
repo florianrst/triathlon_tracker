@@ -6,9 +6,9 @@ from datetime import date
 
 from sqlalchemy import select
 
-from database import engine, get_session
-from models import PlannedWorkout, Sport, StatutSeance, TypeSeance
-from training_plan import duree_totale_s
+from core.database import engine, get_session
+from core.models import PlannedWorkout, Sport, StatutSeance, TypeSeance
+from core.training_plan import duree_totale_s
 
 
 def _blocs():

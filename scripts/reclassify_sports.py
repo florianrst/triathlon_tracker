@@ -23,9 +23,9 @@ from collections import Counter
 
 from sqlalchemy import select
 
-from database import get_session, init_db
+from core.database import get_session, init_db
 from ingestion.common import sport_from_filename
-from models import Session, Sport
+from core.models import Session, Sport
 
 
 def _planned_changes() -> list[tuple[int, str, str, str, str]]:

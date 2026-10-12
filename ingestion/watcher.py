@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from database import INCOMING_DIR
+from core.database import INCOMING_DIR
 from .persist import PASSIVE_EXTS, ProgressCB, SESSION_EXTS, IngestResult, ingest_paths
 
 _KNOWN_EXTS = set(SESSION_EXTS) | set(PASSIVE_EXTS)
@@ -64,7 +64,7 @@ def scan_incoming(
 def main() -> None:  # pragma: no cover
     from collections import Counter
 
-    from database import init_db
+    from core.database import init_db
 
     init_db()
     results = scan_incoming()

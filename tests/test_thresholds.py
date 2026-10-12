@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from datetime import date
 
-from database import get_session
-from models import AthleteThreshold, Discipline
-from thresholds import ThresholdResolver
+from core.database import get_session
+from core.models import AthleteThreshold, Discipline
+from core.thresholds import ThresholdResolver
 
 
 def test_resolver_falls_back_to_profile_without_rows():

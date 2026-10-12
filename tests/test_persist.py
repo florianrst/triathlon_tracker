@@ -4,7 +4,7 @@ from datetime import date
 
 from sqlalchemy import func, select
 
-from database import get_session
+from core.database import get_session
 from ingestion import persist as persist_module
 from ingestion.persist import (
     _process_session_group,
@@ -14,7 +14,7 @@ from ingestion.persist import (
     persist_sleep_daily,
 )
 from ingestion.seed import seed_calibration
-from models import DailyPassive, RecoveryDaily, RunDetails, Session, SessionPoint, SleepDaily
+from core.models import DailyPassive, RecoveryDaily, RunDetails, Session, SessionPoint, SleepDaily
 
 
 def _norm():

@@ -13,10 +13,10 @@ from datetime import date
 import pandas as pd
 from sqlalchemy import select
 
-from athlete import load_profil
-from database import engine
-from models import AthleteThreshold, Discipline
-from tss import Seuils
+from athlete.profil import load_profil
+from core.database import engine
+from core.models import AthleteThreshold, Discipline
+from core.tss import Seuils
 
 # course au sens large (marche, rando, trail, tapis) -> discipline "course"
 _SPORT_TO_DISCIPLINE = {"natation": "natation", "velo": "velo", "course": "course"}
