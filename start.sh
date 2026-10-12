@@ -12,7 +12,26 @@ if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
     exit 0
 fi
 
-nohup uv run streamlit run webapp/app.py --server.port "$PORT" > "$LOG_FILE" 2>&1 &
+nohup uv run streamlit run webapp/app.py --server.port "$PORT" --server.headless true > "$LOG_FILE" 2>&1 &
 echo $! > "$PID_FILE"
 
 echo "Streamlit démarré (PID $(cat "$PID_FILE")), port $PORT, logs dans $LOG_FILE."
+
+URL="http://localhost:$PORT"
+
+for _ in $(seq 1 30); do
+    if curl -s -o /dev/null "$URL"; then
+        break
+    fi
+    sleep 0.5
+done
+
+if command -v wslview >/dev/null 2>&1; then
+    wslview "$URL"
+elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$URL" >/dev/null 2>&1 &
+elif command -v open >/dev/null 2>&1; then
+    open "$URL"
+else
+    echo "Ouvre manuellement : $URL"
+fi
