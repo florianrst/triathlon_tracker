@@ -3,14 +3,9 @@
 from __future__ import annotations
 
 import os
-import sys
 import tempfile
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-# doit etre defini AVANT le premier import de database.py
+# doit etre defini AVANT le premier import de core.database
 _TMP = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
 _TMP.close()
 os.environ["TRIATHLON_DB_URL"] = f"sqlite:///{_TMP.name}"

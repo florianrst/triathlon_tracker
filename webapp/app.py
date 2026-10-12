@@ -2,7 +2,7 @@
 
 Lancement ::
 
-    uv run streamlit run app.py
+    uv run streamlit run webapp/app.py
 """
 
 from __future__ import annotations

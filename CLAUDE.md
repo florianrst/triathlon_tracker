@@ -5,13 +5,21 @@ Le `README.md` est la doc utilisateur ; ce fichier cible le travail sur le code.
 
 ## Stack & commandes
 
-- **uv** gère l'environnement. `uv sync` puis :
+- **uv** gère l'environnement. Le projet est un **paquet installable** (`pyproject.toml`
+  avec `[build-system]` hatchling, `packages = ["core", "athlete", "ui", "ingestion"]`) :
+  `uv sync` installe aussi `triathlon-tracker` lui-même en editable dans `.venv`, donc
+  `core`/`athlete`/`ui`/`ingestion` sont importables depuis n'importe où (aucun
+  `sys.path.insert` dans le code — nécessaire car Streamlit n'ajoute au `sys.path` que
+  le dossier du script lancé, pas la racine du repo).
   - lancer : `uv run streamlit run webapp/app.py` (ou `./start.sh` / `./stop.sh` en arrière-plan)
   - tests : `uv run pytest` (102 tests ; `-p no:warnings` pour le bruit `fitparse`)
 - Python ≥ 3.12. Streamlit · SQLAlchemy 2 · pandas · plotly · folium · `fitparse` · `gpxpy`.
 - DB : SQLite `data/triathlon.db` par défaut, `TRIATHLON_DB_URL` pour pointer ailleurs.
   **Pas d'Alembic** : `core/database.py::init_db()` fait `create_all` + un bloc `ALTER TABLE …
   ADD COLUMN` idempotent (`_ADDED_COLUMNS`) pour les colonnes ajoutées après coup.
+- **Suivi des changements structurels** : voir `CHANGELOG.md` à la racine — une entrée
+  par changement notable d'architecture/packaging (pas pour les bugfix/features
+  courants, qui restent dans l'historique git).
 
 ## Architecture
 
