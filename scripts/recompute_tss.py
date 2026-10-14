@@ -1,6 +1,6 @@
 """(Re)calcule ``tss_calc`` / ``tss_methode`` de toutes les seances.
 
-Charge interne, INDEPENDANTE de la montre (module ``tss.py``). A relancer :
+Charge interne, INDEPENDANTE de la montre (module ``core.tss``). A relancer :
 - apres un gros import ;
 - apres avoir saisi / modifie des seuils (page Tests & zones) -- le hrTSS,
   rTSS, sTSS, pTSS utilisent alors tes vraies valeurs au lieu des defauts.
@@ -19,10 +19,10 @@ from collections import Counter
 
 from sqlalchemy import select
 
-from database import get_session, init_db
-from models import Session, SessionPoint, SwimDetails
-from thresholds import ThresholdResolver
-from tss import compute_tss
+from core.database import get_session, init_db
+from core.models import Session, SessionPoint, SwimDetails
+from core.thresholds import ThresholdResolver
+from core.tss import compute_tss
 
 _BATCH = 200
 

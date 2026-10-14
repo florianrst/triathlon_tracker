@@ -12,8 +12,8 @@ from datetime import date, timedelta
 import pandas as pd
 from sqlalchemy import select
 
-from database import engine, get_session
-from models import Session, SessionPoint, ZoneSet
+from core.database import engine, get_session
+from core.models import Session, SessionPoint, ZoneSet
 
 # --- Intensite d'une seance -------------------------------------------------
 
@@ -69,6 +69,7 @@ def sessions_dataframe() -> pd.DataFrame:
         for r, f in zip(df["ressenti_rpe"], df["frac_haute_hr"])
     ]
     df["duree_h"] = df["duree_s"] / 3600.0
+    df["distance_km"] = df["distance_m"] / 1000.0
     # charge simple facon TRIMP : duree(min) * facteur d'intensite
     poids = {"basse": 1.0, "moderee": 2.0, "haute": 3.0}
     df["charge"] = df["duree_s"] / 60.0 * df["intensite"].map(poids)
@@ -147,6 +148,22 @@ def periodic_load(df: pd.DataFrame, granularite: str = "semaine") -> pd.DataFram
     faible = by_int["basse"] + by_int["moderee"]
     out["pct_basse"] = (faible / out["total_h"] * 100).round(1)
     out["pct_haute"] = (by_int["haute"] / out["total_h"] * 100).round(1)
+    return out.reset_index()
+
+
+def load_by_sport(df: pd.DataFrame, granularite: str, valeur: str) -> pd.DataFrame:
+    """Somme de ``valeur`` (duree_h, distance_km, tss...) par bucket x sport.
+
+    Une colonne par sport, index ``bucket`` ; ``valeur="n_seances"`` compte les seances.
+    """
+    key = pd.to_datetime(df["date"]).dt.to_period(_GRAIN_TO_PERIOD[granularite]).dt.start_time
+    tmp = df.assign(bucket=key)
+    if valeur == "n_seances":
+        out = tmp.pivot_table(index="bucket", columns="sport", values="id",
+                              aggfunc="count", fill_value=0)
+    else:
+        out = tmp.pivot_table(index="bucket", columns="sport", values=valeur,
+                              aggfunc="sum", fill_value=0)
     return out.reset_index()
 
 

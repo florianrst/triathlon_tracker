@@ -1,8 +1,8 @@
-"""Tests de training_plan.py (calcul de duree, formatage des blocs)."""
+"""Tests de core.training_plan (calcul de duree, formatage des blocs)."""
 
 from __future__ import annotations
 
-from training_plan import duree_totale_s, formater_bloc, formater_duree
+from core.training_plan import duree_totale_s, formater_bloc, formater_duree
 
 
 def test_duree_totale_s_somme_duree_fois_repetitions():

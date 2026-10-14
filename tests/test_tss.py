@@ -1,8 +1,8 @@
-"""Calcul de charge interne (module tss.py) : cas connus par formule + cascade."""
+"""Calcul de charge interne (module core.tss) : cas connus par formule + cascade."""
 
 from __future__ import annotations
 
-from tss import Seuils, compute_tss, hr_tss, p_tss, r_tss, s_rpe, s_tss
+from core.tss import Seuils, compute_tss, hr_tss, p_tss, r_tss, s_rpe, s_tss
 
 _TH = Seuils(
     fc_max=200,

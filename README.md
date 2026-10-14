@@ -19,7 +19,9 @@ uv sync                 # cree .venv et installe tout
 ## Lancer l'app
 
 ```bash
-uv run streamlit run app.py
+uv run streamlit run webapp/app.py
+# ou en arriere-plan :
+./start.sh   # puis ./stop.sh pour arreter
 ```
 
 La base SQLite est creee automatiquement dans `data/triathlon.db`.
@@ -82,7 +84,7 @@ uv run python -m scripts.recompute_tss     --dry-run   # apercu, puis --yes
 `reclassify_sports` recalcule `sport`/`sous_type` des seances existantes depuis
 leur nom de fichier (sans re-import). `recompute_tss` (re)calcule `tss_calc` /
 `tss_methode` — la charge d'entrainement calculee **en interne** (module
-`tss.py`), independante de la montre.
+`core/tss.py`), independante de la montre.
 
 ### Fusion FIT + GPX
 
@@ -102,7 +104,7 @@ regroupement (jour / semaine / mois selon l'echelle) + navigation `◀ ▶`.
 
 | Page | Contenu |
 |------|---------|
-| Accueil (`app.py`) | KPI globaux, volume par sport, TSS hebdo, polarisation |
+| Accueil (`webapp/app.py`) | KPI globaux, volume par sport, TSS hebdo, polarisation |
 | 1 · Import | upload / dossier surveille (FIT/GPX + NDJSON 24-7 / sommeil / recup) / saisie manuelle |
 | 2 · Seances | vue agregee par periode + liste filtrable + detail (carte GPS, courbes), edition RPE & notes |
 | 3 · Charge | volume par sport, **TSS calcule maison** + PMC (CTL / ATL / TSB), 80/20, bloc recuperation, evolution des zones |
@@ -122,7 +124,7 @@ regroupement (jour / semaine / mois selon l'echelle) + navigation `◀ ▶`.
   — dedup sur `(timestamp, duree)` dans `parse_sleep`. Un segment de sommeil
   du soir (>= 18 h) est rattache au jour de reveil (lendemain).
 
-## Calcul de charge (TSS) — module `tss.py`
+## Calcul de charge (TSS) — module `core/tss.py`
 
 Cascade hybride par sport, calee sur une echelle 100 = 1 h au seuil :
 
@@ -135,9 +137,9 @@ Cascade hybride par sport, calee sur une echelle 100 = 1 h au seuil :
 
 `hrTSS` = TRIMP de Banister pondere par la reserve cardiaque. Les seuils
 proviennent de la table `athlete_thresholds` (historisee, saisie page
-Tests & zones) ; a defaut, du profil (`athlete.py`, lu depuis `user/user.json`
-sinon FC max 200 / repos 60, seuil ≈ 90 % FCmax). La colonne `tss_methode`
-trace la methode retenue pour chaque seance.
+Tests & zones) ; a defaut, du profil (`athlete/profil.py`, lu depuis
+`user/user.json` sinon FC max 200 / repos 60, seuil ≈ 90 % FCmax). La colonne
+`tss_methode` trace la methode retenue pour chaque seance.
 
 ## Tests
 
@@ -157,10 +159,10 @@ montre + `tss_calc`/`tss_methode` calcules maison) + `session_points` (detail
 `run_details` (1-1 par sport) + `threshold_tests` (+ `session_id` optionnel) et
 `zone_sets` et `athlete_thresholds` (historises, jamais ecrases) +
 `daily_passive` / `sleep_daily` / `recovery_daily` (agregats journaliers
-NDJSON). Voir `models.py`.
+NDJSON). Voir `core/models.py`.
 
 Pas d'Alembic : `init_db()` cree les tables manquantes et ajoute les colonnes
-recentes via un petit `ALTER TABLE` idempotent (`database.py`).
+recentes via un petit `ALTER TABLE` idempotent (`core/database.py`).
 
 ## Licence
 

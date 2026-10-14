@@ -13,9 +13,9 @@ import streamlit as st
 from plotly.subplots import make_subplots
 from sqlalchemy import select
 
-from analysis import performance_management, sessions_dataframe
-from database import engine, init_db
-from models import RecoveryDaily, SleepDaily
+from core.analysis import performance_management, sessions_dataframe
+from core.database import engine, init_db
+from core.models import RecoveryDaily, SleepDaily
 from ui.chat import widget_chat
 from ui.periode import selecteur_periode
 

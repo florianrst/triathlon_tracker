@@ -18,7 +18,7 @@ import os
 
 import streamlit as st
 
-from user_memory import append_conversation_summary, append_profil_note, charger_contexte_utilisateur
+from athlete.memory import append_conversation_summary, append_profil_note, charger_contexte_utilisateur
 
 _MODEL_DEFAUT = "claude-sonnet-5"
 

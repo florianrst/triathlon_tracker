@@ -8,17 +8,18 @@ import plotly.graph_objects as go
 import streamlit as st
 from sqlalchemy import select
 
-from analysis import (
+from core.analysis import (
     INTENSITES,
     aggregate,
+    load_by_sport,
     performance_management,
     periodic_load,
     polarization_ratio,
     sessions_dataframe,
     zone_history,
 )
-from database import engine, init_db
-from models import RecoveryDaily, SleepDaily
+from core.database import engine, init_db
+from core.models import RecoveryDaily, SleepDaily
 from ui.chat import widget_chat
 from ui.periode import selecteur_periode
 
@@ -42,12 +43,36 @@ if df.empty:
 pl = periodic_load(df, periode.granularite)
 
 # --- Volume par sport ----------------------------------------------------
-st.subheader(f"Volume par sport — groupe par {periode.granularite}")
-sports = [c for c in ["natation", "velo", "course", "renfo", "autre"] if c in pl.columns]
+METRIQUES = {
+    "Volume (h)": ("duree_h", "h", "{:.1f}"),
+    "Distance (km)": ("distance_km", "km", "{:.0f}"),
+    "TSS": ("tss", "TSS", "{:.0f}"),
+    "Seances": ("n_seances", "seances", "{:.0f}"),
+}
+st.subheader(f"Charge par sport — groupe par {periode.granularite}")
+choix = st.radio("Afficher", list(METRIQUES), horizontal=True, key="charge_metrique")
+col, unite, fmt = METRIQUES[choix]
+lb = load_by_sport(df, periode.granularite, col)
+sports = [c for c in ["natation", "velo", "course", "renfo", "autre"] if c in lb.columns]
+totaux = lb[sports].sum(axis=1)
+seuil = 0.05 * totaux.max() if len(totaux) else 0
 fig = go.Figure()
 for sp in sports:
-    fig.add_bar(x=pl["bucket"], y=pl[sp], name=sp)
-fig.update_layout(barmode="stack", height=360, yaxis_title="heures", legend=dict(orientation="h"))
+    vals = lb[sp]
+    fig.add_bar(
+        x=lb["bucket"], y=vals, name=sp,
+        text=[fmt.format(v) if v >= seuil and v > 0 else "" for v in vals],
+        textposition="inside", insidetextanchor="middle",
+    )
+fig.add_scatter(
+    x=lb["bucket"], y=totaux, mode="text", showlegend=False, hoverinfo="skip",
+    text=[fmt.format(v) for v in totaux], textposition="top center",
+)
+fig.update_layout(
+    barmode="stack", height=380, yaxis_title=unite, margin=dict(t=50),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+)
+fig.update_yaxes(range=[0, totaux.max() * 1.15] if len(totaux) and totaux.max() > 0 else None)
 st.plotly_chart(fig, use_container_width=True)
 
 # --- TSS calcule maison + PMC (CTL / ATL / TSB) -------------------------
@@ -65,7 +90,8 @@ fig2.add_scatter(x=pmc["date"], y=pmc["ctl"], name="CTL (forme)", line=dict(colo
 fig2.add_scatter(x=pmc["date"], y=pmc["atl"], name="ATL (fatigue)", line=dict(color="#e2483d"))
 fig2.add_scatter(x=pmc["date"], y=pmc["tsb"], name="TSB (fraicheur)",
                  line=dict(color="#4c9a52", dash="dot"))
-fig2.update_layout(height=360, legend=dict(orientation="h"))
+fig2.update_layout(height=360, margin=dict(t=50),
+                   legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0))
 st.plotly_chart(fig2, use_container_width=True)
 
 meth = df["tss_methode"].dropna().value_counts()
@@ -105,7 +131,8 @@ with g2:
     long = long.sort_values("intensite", key=lambda s: s.map(order))
     figp = px.bar(long, x="bucket", y="heures", color="intensite",
                   color_discrete_map={"basse": "#4c9a52", "moderee": "#e8b84b", "haute": "#e2483d"})
-    figp.update_layout(barmode="stack", height=280, legend=dict(orientation="h"))
+    figp.update_layout(barmode="stack", height=280, margin=dict(t=50),
+                       legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0))
     st.plotly_chart(figp, use_container_width=True)
 
 recap = pl[["bucket", "total_h", "tss", "pct_basse", "pct_haute"]].copy()

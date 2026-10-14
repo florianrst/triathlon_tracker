@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from database import INCOMING_DIR
+from core.database import INCOMING_DIR
 
 FC_MAX_DEFAUT = 200
 FC_REPOS_DEFAUT = 60

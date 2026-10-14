@@ -10,9 +10,9 @@ import plotly.express as px
 import streamlit as st
 from sqlalchemy import select
 
-from database import engine, get_session, init_db
+from core.database import engine, get_session, init_db
 from ingestion.seed import seed_calibration
-from models import AthleteThreshold, Discipline, Session, ThresholdTest, ZoneSet
+from core.models import AthleteThreshold, Discipline, Session, ThresholdTest, ZoneSet
 from ui.chat import widget_chat
 
 # course au sens large -> discipline "course"

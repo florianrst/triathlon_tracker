@@ -2,7 +2,7 @@
 
 Lancement ::
 
-    uv run streamlit run app.py
+    uv run streamlit run webapp/app.py
 """
 
 from __future__ import annotations
@@ -10,8 +10,8 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from analysis import polarization_ratio, sessions_dataframe
-from database import init_db
+from core.analysis import polarization_ratio, sessions_dataframe
+from core.database import init_db
 from ui.chat import widget_chat
 
 st.set_page_config(page_title="Suivi Triathlon", page_icon="🏊", layout="wide")

@@ -15,7 +15,7 @@ from typing import Iterator
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session, sessionmaker
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 INCOMING_DIR = DATA_DIR / "incoming"
 DATA_DIR.mkdir(exist_ok=True)
@@ -55,7 +55,7 @@ def _apply_light_migrations() -> None:
 
 def init_db() -> None:
     """Cree les tables manquantes + ajoute les colonnes recentes. Idempotent."""
-    from models import Base  # import tardif pour eviter les cycles
+    from core.models import Base  # import tardif pour eviter les cycles
 
     Base.metadata.create_all(engine)
     _apply_light_migrations()

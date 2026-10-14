@@ -16,9 +16,9 @@ import pandas as pd
 import streamlit as st
 from sqlalchemy import select
 
-from database import engine, get_session, init_db
-from models import PlannedWorkout, Session, Sport, StatutSeance, TypeSeance
-from training_plan import TYPES_BLOC, ZONES_CIBLES, duree_totale_s, formater_bloc, formater_duree
+from core.database import engine, get_session, init_db
+from core.models import PlannedWorkout, Session, Sport, StatutSeance, TypeSeance
+from core.training_plan import TYPES_BLOC, ZONES_CIBLES, duree_totale_s, formater_bloc, formater_duree
 from ui.chat import widget_chat
 
 st.set_page_config(page_title="Entrainements", page_icon="🏋️", layout="wide")

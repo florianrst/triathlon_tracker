@@ -1,4 +1,4 @@
-"""Agregation par periode + modele PMC (analysis.py)."""
+"""Agregation par periode + modele PMC (core.analysis)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
-from analysis import aggregate, performance_management
+from core.analysis import aggregate, performance_management
 from ui.periode import Periode, _bornes, _decale
 
 

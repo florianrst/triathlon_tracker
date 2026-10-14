@@ -9,11 +9,26 @@ wheels/
 # Virtual environments
 .venv
 
-# Base de données locale et fichiers importés
+# Données personnelles : base locale, exports importés, archives
 data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
 data/incoming/*
 !data/incoming/.gitkeep
 data/archive/
+*.sqlite
+*.sqlite3
+
+# Mémoire utilisateur (profil.md, conversations.md) et profil athlète
+user/
+**/user/user.json
+
+# Fichiers bruts d'activité / export montre (jamais versionnés)
+*.fit
+*.gpx
+*.ndjson
+*:Zone.Identifier
 
 # Secrets API Claude (si utilise a la place de la variable d'environnement)
 .env
