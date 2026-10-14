@@ -36,7 +36,9 @@ webapp/
   app.py                  accueil (KPI globaux)
   pages/1_import.py       upload / scan dossier / saisie manuelle
   pages/2_seances.py      vue agrégée par période + liste + détail séance
+                          (courbes au choix : FC/allure/vitesse/cadence/puissance/altitude)
   pages/3_charge.py       TSS maison + PMC (CTL/ATL/TSB) + 80/20 + récup + zones
+                          (bar plot par sport : volume/distance/TSS/séances au choix)
   pages/4_tests_zones.py  tests de seuil (rattachables à une séance) + profil/seuils + zones
   pages/5_plan.py         générateur de plan périodisé (non persisté)
   pages/6_recuperation.py sommeil + balance récup/stress + charge vs récup J+1
@@ -47,6 +49,7 @@ core/
   models.py         ORM : Session, SessionPoint, swim/bike/run_details, threshold_tests,
                      zone_sets, athlete_thresholds, daily_passive/sleep_daily/recovery_daily
   analysis.py        sessions_dataframe, aggregate(df, granularite), periodic_load,
+                     load_by_sport(df, granularite, valeur),
                      weekly_load (wrapper), performance_management (PMC), polarization_ratio
   tss.py             hr_tss / r_tss / s_tss / p_tss / s_rpe + routeur compute_tss
   thresholds.py      ThresholdResolver.seuils_for(sport, date) -> tss.Seuils (reste dans

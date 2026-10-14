@@ -68,7 +68,8 @@ else:
     a3.metric("TSS cumule", f"{buckets['tss'].sum():.0f}")
     figb = px.bar(buckets, x="bucket", y=["duree_h", "tss"], barmode="group",
                   labels={"value": "", "bucket": "", "variable": ""})
-    figb.update_layout(height=300, legend=dict(orientation="h"))
+    figb.update_layout(height=300, margin=dict(t=50),
+                       legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0))
     st.plotly_chart(figb, use_container_width=True)
 
 st.divider()
@@ -134,36 +135,49 @@ if not geo.empty:
     st_folium(fmap, use_container_width=True, height=420, returned_objects=[])
 
 # Courbes
-if not pts.empty and pts[["hr", "vitesse", "altitude", "cadence"]].notna().any().any():
+CANAUX = ("hr", "vitesse", "altitude", "cadence", "puissance")
+if not pts.empty and pts[[c for c in CANAUX if c in pts]].notna().any().any():
     st.subheader("Courbes")
     pts["t_min"] = pts["t_offset_s"] / 60.0
     show_pace = row["sport"] in ("course", "natation")
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # cle -> (libelle, serie, couleur, unite)
+    courbes = {}
     if pts["hr"].notna().any():
-        fig.add_trace(go.Scatter(x=pts["t_min"], y=pts["hr"], name="FC (bpm)",
-                                 line=dict(color="#e2483d")), secondary_y=False)
+        courbes["FC"] = ("FC", pts["hr"], "#e2483d", "bpm")
     if pts["vitesse"].notna().any():
         if show_pace:
-            pace = pts["vitesse"].where(pts["vitesse"] > 0.3)
-            pace = (1000.0 / 60.0) / pace  # min/km
-            fig.add_trace(go.Scatter(x=pts["t_min"], y=pace, name="Allure (min/km)",
-                                     line=dict(color="#2f6fed")), secondary_y=True)
-            fig.update_yaxes(title_text="Allure (min/km)", autorange="reversed", secondary_y=True)
+            v = pts["vitesse"].where(pts["vitesse"] > 0.3)
+            courbes["Allure"] = ("Allure", (1000.0 / 60.0) / v, "#2f6fed", "min/km")
         else:
-            fig.add_trace(go.Scatter(x=pts["t_min"], y=pts["vitesse"] * 3.6, name="Vitesse (km/h)",
-                                     line=dict(color="#2f6fed")), secondary_y=True)
-            fig.update_yaxes(title_text="Vitesse (km/h)", secondary_y=True)
-    fig.update_yaxes(title_text="FC (bpm)", secondary_y=False)
-    fig.update_xaxes(title_text="Temps (min)")
-    fig.update_layout(height=380, legend=dict(orientation="h"), margin=dict(t=20))
-    st.plotly_chart(fig, use_container_width=True)
-
+            courbes["Vitesse"] = ("Vitesse", pts["vitesse"] * 3.6, "#2f6fed", "km/h")
+    if pts["cadence"].notna().any():
+        courbes["Cadence"] = ("Cadence", pts["cadence"], "#8e5bd0", "tr/min")
+    if "puissance" in pts and pts["puissance"].notna().any():
+        courbes["Puissance"] = ("Puissance", pts["puissance"], "#e8883a", "W")
     if pts["altitude"].notna().any():
-        alt = go.Figure(go.Scatter(x=pts["t_min"], y=pts["altitude"], fill="tozeroy",
-                                   line=dict(color="#7a8b99"), name="Altitude"))
-        alt.update_layout(height=220, margin=dict(t=10), yaxis_title="Altitude (m)",
-                          xaxis_title="Temps (min)")
-        st.plotly_chart(alt, use_container_width=True)
+        courbes["Altitude"] = ("Altitude", pts["altitude"], "#7a8b99", "m")
+
+    defaut = [k for k in ("FC", "Allure", "Vitesse") if k in courbes]
+    choix = st.multiselect("Courbes a afficher", list(courbes), default=defaut)
+    if choix:
+        fig = make_subplots(rows=len(choix), cols=1, shared_xaxes=True, vertical_spacing=0.04)
+        for i, k in enumerate(choix, start=1):
+            nom, serie, couleur, unite = courbes[k]
+            kw = dict(fill="tozeroy") if k == "Altitude" else {}
+            fig.add_trace(
+                go.Scatter(x=pts["t_min"], y=serie, name=f"{nom} ({unite})", mode="lines",
+                           line=dict(color=couleur, width=1.5), connectgaps=True, **kw),
+                row=i, col=1,
+            )
+            fig.update_yaxes(title_text=unite, row=i, col=1)
+            if k == "Allure":
+                lo, hi = serie.quantile(0.02), serie.quantile(0.98)
+                pad = (hi - lo) * 0.1
+                fig.update_yaxes(range=[hi + pad, lo - pad], row=i, col=1)  # inverse
+        fig.update_xaxes(title_text="Temps (min)", row=len(choix), col=1)
+        fig.update_layout(height=max(280, 230 * len(choix)), hovermode="x unified",
+                          margin=dict(t=50), showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
 
 # --- Edition RPE / notes ------------------------------------------------
 st.divider()

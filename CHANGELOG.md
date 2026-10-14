@@ -5,6 +5,24 @@ d'exploitation). Les bugfix et features courants restent dans l'historique git ;
 ce fichier ne consigne que les décisions qui changent la façon de lancer, tester ou
 organiser le projet.
 
+## 2026-10-14 — Graphes : courbes sélectionnables et métrique de charge au choix
+
+**Pourquoi** : courbes de séance figées (FC + allure/vitesse sur un axe secondaire,
+points parfois invisibles à cause des `NaN` et de l'échelle) ; légendes qui
+recouvraient l'axe x sur la page Charge ; pas de choix de métrique sur le bar plot.
+
+**Changement** :
+- `2_seances.py` : multiselect des courbes (FC, allure/vitesse, cadence, puissance,
+  altitude), un panneau par courbe (échelle propre), `connectgaps`, axe d'allure borné
+  aux percentiles 2–98 %.
+- `3_charge.py` : radio Volume / Distance / TSS / Séances ; totaux au-dessus des barres
+  et valeurs par sport dans les segments ; légendes plotly placées au-dessus du graphe.
+- `core/analysis.py` : nouveau `load_by_sport(df, granularite, valeur)` ;
+  `sessions_dataframe` expose `distance_km`.
+
+**Fichiers clés** : `webapp/pages/2_seances.py`, `webapp/pages/3_charge.py`,
+`core/analysis.py`.
+
 ## 2026-10-12 — Paquet installable (suppression des hacks `sys.path`)
 
 **Pourquoi** : après le split en `webapp/`/`core/`/`athlete/` (entrée précédente),
